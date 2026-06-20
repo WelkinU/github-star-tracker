@@ -1,0 +1,22 @@
+# Organization info
+github_org: your_org_name         #ex put "your-org-name" if the url is github.com/your-org-name
+
+# Template naming conventions
+tool_name_navbar: WelkinU's Github Star Tracker
+xkcd_plot_watermark_text: WelkinU's Github Star Tracker
+
+# FastAPI / URL link params
+# base_url is the externally-visible root URL used to build shareable embed links
+# (e.g. Markdown image badges, doodle PNG hrefs).  It can differ from host/port
+# when the server runs behind a reverse proxy or is accessed from another machine.
+# host/port only control what interface/port uvicorn binds to locally.
+base_url: http://localhost:8000
+host: localhost
+port: 8000
+
+#database params
+database_path: ./stars.db
+cache_dir: ./cache          #doodle xkcd style image cache
+
+# Frontend UI params, maybe these should just be hardcoded
+default_top_n: 15

@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Star Tracker{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <!-- Left column: filters then repos -->
+  <div class="sidebar-col">
+
+    <!-- Filters panel -->
+    <aside class="sidebar">
+      <h2>Filters</h2>
+
+      <div class="filter-row">
+        <label class="toggle-label">
+          <input type="checkbox" id="top-n-enabled" checked>
+          Show top
+        </label>
+        <input type="number" id="top-n-value" value="{{ top_n }}" min="1" max="9999">
+        <span class="filter-unit">repos</span>
+      </div>
+
+      <div class="filter-row">
+        <label class="toggle-label">
+          <input type="checkbox" id="min-stars-enabled">
+          Min stars
+        </label>
+        <input type="number" id="min-stars-value" value="1" min="0">
+      </div>
+
+      <div class="filter-row">
+        <input type="text" id="name-filter-value" class="name-filter-input" placeholder="name contains…">
+      </div>
+
+      <div class="filter-row filter-row--apply">
+        <button type="button" id="apply-filters">Apply Filters</button>
+      </div>
+    </aside>
+
+    <!-- Repositories panel -->
+    <aside class="sidebar">
+      <div class="repo-list-header">
+        <h2>Repositories</h2>
+        <div class="bulk-actions">
+          <button type="button" id="check-all">&#10003; visible</button>
+          <button type="button" id="uncheck-all">&#10007; all</button>
+        </div>
+      </div>
+
+      <div class="repo-list">
+        {% for repo in all_repos %}
+        <label class="repo-entry" data-stars="{{ repo.star_count }}" data-index="{{ loop.index0 }}" data-name="{{ repo.name | lower }}">
+          <input
+            type="checkbox"
+            class="repo-toggle"
+            data-index="{{ loop.index0 }}"
+            {% if repo.id in selected_ids %}checked{% endif %}
+          >
+          <a href="/repos/{{ repo.name }}" class="repo-short-name" title="{{ repo.name }}">{{ repo.name.split('/')[1] }}</a>
+          <span class="star-count">{{ repo.star_count }} ★</span>
+        </label>
+        {% endfor %}
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Right column: chart + chart options -->
+  <div class="chart-col">
+    <div class="chart-container">
+      <div id="chart"></div>
+    </div>
+
+    <div class="chart-options">
+      <h2>Chart Options</h2>
+      <div class="date-range-row">
+        <label>From <input type="date" id="date-from"></label>
+        <label>To <input type="date" id="date-to"></label>
+        <button type="button" id="apply-dates">Apply</button>
+        <button type="button" id="reset-dates">Reset</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const traces = {{ traces_json | safe }};
+
+  function isDark() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+  }
+
+  function plotlyTheme() {
+    return isDark()
+      ? { paper_bgcolor: '#1e1e1e', plot_bgcolor: '#1e1e1e', font: { color: '#e0e0e0' }, gridcolor: '#333' }
+      : { paper_bgcolor: '#fff',    plot_bgcolor: '#fff',    font: { color: '#222' },   gridcolor: '#e5e5e5' };
+  }
+
+  function buildLayout(extraRange) {
+    const t = plotlyTheme();
+    const base = {
+      margin: { t: 40, r: 20 },
+      paper_bgcolor: t.paper_bgcolor,
+      plot_bgcolor:  t.plot_bgcolor,
+      font:  { color: t.font.color },
+      xaxis: {
+        title: 'Date',
+        tickformat: '%b %Y',
+        hoverformat: '%b %-d, %Y',
+        gridcolor: t.gridcolor,
+      },
+      yaxis: { title: 'Stars', gridcolor: t.gridcolor },
+      legend: { orientation: 'h', y: -0.2 },
+      hoverlabel: { namelength: -1 },
+    };
+    if (extraRange) {
+      base.xaxis.range = extraRange;
+    }
+    return base;
+  }
+
+  let currentRange = null;
+
+  Plotly.newPlot('chart', traces, buildLayout(null), { responsive: true });
+
+  function reapplyPlotlyTheme() {
+    Plotly.relayout('chart', buildLayout(currentRange));
+  }
+  window.reapplyPlotlyTheme = reapplyPlotlyTheme;
+
+  // ── Individual repo toggles ───────────────────────────────────
+  document.querySelectorAll('.repo-toggle').forEach(cb => {
+    cb.addEventListener('change', function () {
+      Plotly.restyle('chart', { visible: this.checked }, [parseInt(this.dataset.index)]);
+    });
+  });
+
+  document.getElementById('check-all').addEventListener('click', () => {
+    const vis = new Array(traces.length).fill(null);
+    document.querySelectorAll('.repo-toggle').forEach(cb => {
+      if (!cb.checked) {
+        cb.checked = true;
+        vis[parseInt(cb.dataset.index)] = true;
+      }
+    });
+    const indices = vis.map((v, i) => v !== null ? i : -1).filter(i => i >= 0);
+    if (indices.length) Plotly.restyle('chart', { visible: true }, indices);
+  });
+
+  document.getElementById('uncheck-all').addEventListener('click', () => {
+    const indices = [];
+    document.querySelectorAll('.repo-toggle').forEach(cb => {
+      if (cb.checked) { cb.checked = false; indices.push(parseInt(cb.dataset.index)); }
+    });
+    if (indices.length) Plotly.restyle('chart', { visible: false }, indices);
+  });
+
+  // ── Apply Filters (button-triggered, single batched Plotly call) ──
+  function applyFilters() {
+    const topNActive  = document.getElementById('top-n-enabled').checked;
+    const topN        = topNActive ? (parseInt(document.getElementById('top-n-value').value) || 9999) : 9999;
+    const starsActive = document.getElementById('min-stars-enabled').checked;
+    const threshold   = starsActive ? (parseInt(document.getElementById('min-stars-value').value) || 0) : 0;
+    const nameText    = document.getElementById('name-filter-value').value.trim().toLowerCase();
+    const nameActive  = nameText.length > 0;
+
+    // Build a full visibility array for one batched Plotly.restyle call
+    const newVisibility = new Array(traces.length).fill(false);
+
+    document.querySelectorAll('.repo-entry').forEach(entry => {
+      const idx   = parseInt(entry.dataset.index);
+      const stars = parseInt(entry.dataset.stars) || 0;
+      const name  = entry.dataset.name || '';
+      const cb    = entry.querySelector('.repo-toggle');
+
+      // top-N: repos are already sorted by stars desc so index === rank
+      const passTopN  = !topNActive  || idx < topN;
+      const passStars = !starsActive || stars >= threshold;
+      const passName  = !nameActive  || name.includes(nameText);
+      const passes    = passTopN && passStars && passName;
+
+      cb.checked = passes;
+      newVisibility[idx] = passes;
+    });
+
+    // Single call updates all traces at once — much faster than one-by-one
+    Plotly.restyle('chart', { visible: newVisibility });
+  }
+
+  document.getElementById('apply-filters').addEventListener('click', applyFilters);
+
+  // ── Date range filter ─────────────────────────────────────────
+  document.getElementById('apply-dates').addEventListener('click', () => {
+    const from = document.getElementById('date-from').value;
+    const to   = document.getElementById('date-to').value;
+    currentRange = [from || null, to || null].every(v => v)
+      ? [from, to]
+      : (from ? [from, null] : (to ? [null, to] : null));
+    Plotly.relayout('chart', buildLayout(currentRange));
+  });
+
+  document.getElementById('reset-dates').addEventListener('click', () => {
+    document.getElementById('date-from').value = '';
+    document.getElementById('date-to').value   = '';
+    currentRange = null;
+    Plotly.relayout('chart', buildLayout(null));
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Search – Star Tracker{% endblock %}
+
+{% block content %}
+<div class="search-page">
+
+  <h1>Search Repositories</h1>
+
+  <form class="search-form" method="get" action="/search">
+    <input
+      type="text"
+      name="q"
+      value="{{ q }}"
+      placeholder="Repository name..."
+      autofocus
+    >
+    <button type="submit">Search</button>
+  </form>
+
+  {% if q %}
+    {% if results %}
+      <p class="search-count">{{ results | length }} result{{ 's' if results | length != 1 else '' }} for <strong>{{ q }}</strong></p>
+
+      <div class="search-results">
+        {% for repo in results %}
+        <div class="search-result-row">
+          <div class="search-result-summary" onclick="toggleChart({{ loop.index0 }})">
+            <span class="expand-icon" id="icon-{{ loop.index0 }}">&#9654;</span>
+            <span class="repo-short-name">{{ repo.name.split('/')[1] }}</span>
+            <span class="repo-full-name">{{ repo.name }}</span>
+            <span class="star-badge">{{ repo.star_count }} ★</span>
+            <a href="/repos/{{ repo.name }}" class="view-link" onclick="event.stopPropagation()">Full page →</a>
+            <a href="https://github.com/{{ repo.name }}" class="view-link" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">GitHub ↗</a>
+          </div>
+          <div class="search-chart-expand" id="chart-{{ loop.index0 }}" style="display:none">
+            <div class="doodle-wrap">
+              <img
+                src="{{ base_url }}/repos/{{ repo.id }}/doodle.png"
+                alt="Star history for {{ repo.name }}"
+                loading="lazy"
+              >
+            </div>
+            <div class="embed-url-row">
+              <span class="embed-url-label">Markdown embed</span>
+              <code class="embed-url-code" id="embed-{{ loop.index0 }}">![Star History]({{ base_url }}/repos/{{ repo.id }}/doodle.png)</code>
+              <button
+                class="copy-btn"
+                title="Copy to clipboard"
+                onclick="copyEmbed({{ loop.index0 }}, this); event.stopPropagation()"
+                aria-label="Copy embed URL"
+              >&#128203;</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <p class="search-empty">No repositories found matching <strong>{{ q }}</strong>.</p>
+    {% endif %}
+  {% endif %}
+
+</div>
+
+<script>
+  function toggleChart(idx) {
+    const panel = document.getElementById('chart-' + idx);
+    const icon  = document.getElementById('icon-' + idx);
+    const open  = panel.style.display === 'none';
+    panel.style.display = open ? '' : 'none';
+    icon.innerHTML = open ? '&#9660;' : '&#9654;';
+  }
+
+  function copyEmbed(idx, btn) {
+    const text = document.getElementById('embed-' + idx).textContent;
+    navigator.clipboard.writeText(text).then(function () {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '&#10003;';
+      btn.classList.add('copy-btn--ok');
+      setTimeout(function () {
+        btn.innerHTML = orig;
+        btn.classList.remove('copy-btn--ok');
+      }, 1500);
+    });
+  }
+</script>
+{% endblock %}

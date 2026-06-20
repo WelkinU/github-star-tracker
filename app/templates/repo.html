@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ repo.name.split('/')[1] }} – Star Tracker{% endblock %}
+
+{% block content %}
+<div class="repo-page">
+
+  <div class="repo-header">
+    <h1>{{ repo.name.split('/')[1] }}</h1>
+    <span class="repo-full-name">{{ repo.name }}</span>
+    <span class="star-badge">{{ repo.star_count }} ★</span>
+  </div>
+
+  <div id="chart"></div>
+
+  <div class="embed-section">
+    <h3>Embed in README</h3>
+    <p>The link below embeds the <strong>static doodle chart</strong> (shown below), not the interactive chart above.</p>
+    <code id="embed-code">{{ markdown_embed }}</code>
+    <button onclick="copyEmbed(this)">Copy</button>
+  </div>
+
+  <div class="doodle-wrap">
+    <p class="doodle-label">Static doodle chart (what gets embedded)</p>
+    <img
+      src="{{ doodle_url }}"
+      alt="XKCD-style star history for {{ repo.name }}"
+    >
+  </div>
+
+</div>
+
+<script>
+  const traces = {{ traces_json | safe }};
+
+  function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+  function plotlyTheme() {
+    return isDark()
+      ? { paper_bgcolor: '#1e1e1e', plot_bgcolor: '#1e1e1e', font: { color: '#e0e0e0' }, gridcolor: '#333' }
+      : { paper_bgcolor: '#fff',    plot_bgcolor: '#fff',    font: { color: '#222' },   gridcolor: '#e5e5e5' };
+  }
+  function buildLayout() {
+    const t = plotlyTheme();
+    return {
+      margin: { t: 40, r: 20 },
+      paper_bgcolor: t.paper_bgcolor,
+      plot_bgcolor:  t.plot_bgcolor,
+      font: { color: t.font.color },
+      xaxis: { title: 'Date', tickformat: '%b %Y', hoverformat: '%b %-d, %Y', gridcolor: t.gridcolor },
+      yaxis: { title: 'Stars', gridcolor: t.gridcolor },
+      showlegend: false,
+      hoverlabel: { namelength: -1 },
+    };
+  }
+
+  Plotly.newPlot('chart', traces, buildLayout(), { responsive: true });
+
+  function reapplyPlotlyTheme() { Plotly.relayout('chart', buildLayout()); }
+  window.reapplyPlotlyTheme = reapplyPlotlyTheme;
+
+  function copyEmbed(btn) {
+    const text = document.getElementById('embed-code').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+</script>
+{% endblock %}

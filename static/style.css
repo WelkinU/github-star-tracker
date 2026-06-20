@@ -1,0 +1,503 @@
+/* ═══════════════════════════════════════════════════════════════
+   CSS custom properties — light & dark themes
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg:          #f5f5f5;
+  --surface:     #fff;
+  --border:      #e0e0e0;
+  --border-sub:  #eee;
+  --text:        #222;
+  --text-muted:  #666;
+  --text-dim:    #888;
+  --link:        #0366d6;
+  --input-bg:    #fff;
+  --input-dis:   #f5f5f5;
+  --hover-row:   #f0f4f8;
+  --bulk-bg:     #f5f5f5;
+  --bulk-hover:  #e8e8e8;
+  --embed-bg:    #f8f8f8;
+  --code-bg:     #eee;
+  --star-badge-bg:     #fff3cd;
+  --star-badge-border: #ffc107;
+  --search-hover: #f5f8ff;
+  --search-expand-border: #e8e8e8;
+}
+[data-theme="dark"] {
+  --bg:          #121212;
+  --surface:     #1e1e1e;
+  --border:      #333;
+  --border-sub:  #2a2a2a;
+  --text:        #e0e0e0;
+  --text-muted:  #aaa;
+  --text-dim:    #777;
+  --link:        #58a6ff;
+  --input-bg:    #2a2a2a;
+  --input-dis:   #1a1a1a;
+  --hover-row:   #252525;
+  --bulk-bg:     #2a2a2a;
+  --bulk-hover:  #333;
+  --embed-bg:    #252525;
+  --code-bg:     #2a2a2a;
+  --star-badge-bg:     #3a2e00;
+  --star-badge-border: #7a5c00;
+  --search-hover: #1a2233;
+  --search-expand-border: #2a2a2a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ── Header / Navbar (Bootstrap 5 style) ─────────────────────── */
+header {
+  background: #212529;
+  color: rgba(255,255,255,.85);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 56px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.site-title {
+  color: rgba(255,255,255,.9);
+  text-decoration: none;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+  padding: 4px 0;
+}
+.site-title:hover { color: #fff; }
+header nav {
+  display: flex;
+  gap: 2px;
+}
+header nav a {
+  color: rgba(255,255,255,.55);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+header nav a:hover { color: rgba(255,255,255,.75); }
+header nav a.active { color: rgba(255,255,255,.9); }
+
+/* dark mode toggle — pushed to far right */
+.dark-mode-toggle {
+  margin-left: auto;
+  background: none;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 6px;
+  color: rgba(255,255,255,.8);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 10px;
+  line-height: 1.5;
+  transition: border-color 0.15s, background 0.15s;
+}
+.dark-mode-toggle:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.6); }
+
+/* ── Page wrapper ────────────────────────────────────────────── */
+main {
+  padding: 24px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* ── Dashboard layout ────────────────────────────────────────── */
+.dashboard {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* Left column: stacked sidebar panels */
+.sidebar-col {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Right column: chart + options */
+.chart-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Sidebar panels ──────────────────────────────────────────── */
+.sidebar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+}
+.sidebar h2 {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* ── Filter rows ─────────────────────────────────────────────── */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  color: var(--text);
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-sub);
+}
+.filter-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.filter-unit { color: var(--text-muted); font-size: 0.82rem; }
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.filter-row input[type="number"] {
+  width: 58px;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.filter-row input[type="number"]:disabled {
+  background: var(--input-dis);
+  color: var(--text-dim);
+}
+.name-filter-input {
+  flex: 1;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.name-filter-input::placeholder { color: var(--text-dim); }
+.filter-row--apply { justify-content: flex-end; }
+#apply-filters {
+  padding: 5px 18px;
+  background: #0366d6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+#apply-filters:hover { background: #0256b5; }
+
+/* ── Repo list header (h2 + bulk actions) ────────────────────── */
+.repo-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.repo-list-header h2 { margin-bottom: 0; }
+.bulk-actions { display: flex; gap: 5px; }
+.bulk-actions button {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bulk-bg);
+  cursor: pointer;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.bulk-actions button:hover { background: var(--bulk-hover); }
+
+.repo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: calc(100vh - 360px);
+  overflow-y: auto;
+}
+.repo-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 3px 4px;
+  border-radius: 4px;
+}
+.repo-entry:hover { background: var(--hover-row); }
+.repo-entry--dim  { opacity: 0.38; pointer-events: none; }
+.star-count { color: var(--text-dim); font-size: 0.8rem; flex-shrink: 0; }
+
+/* ── Chart area ──────────────────────────────────────────────── */
+.chart-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+}
+#chart { width: 100%; height: 540px; }
+
+/* ── Chart options ───────────────────────────────────────────── */
+.chart-options {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.chart-options h2 {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.date-range-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.date-range-row label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.date-range-row input[type="date"] {
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: var(--input-bg);
+  color: var(--text);
+  color-scheme: light dark;
+}
+.date-range-row button {
+  padding: 4px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+#apply-dates  { background: #0366d6; color: #fff; }
+#apply-dates:hover  { background: #0256b5; }
+#reset-dates  { background: var(--bulk-bg); color: var(--text-muted); border: 1px solid var(--border); }
+#reset-dates:hover  { background: var(--bulk-hover); }
+
+/* ── Repo page ───────────────────────────────────────────────── */
+.repo-page { max-width: 960px; }
+
+.repo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.repo-header h1 { font-size: 1.4rem; }
+.repo-full-name { color: var(--text-muted); font-size: 0.9rem; }
+.star-badge {
+  background: var(--star-badge-bg);
+  border: 1px solid var(--star-badge-border);
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.embed-section {
+  margin-top: 28px;
+  background: var(--embed-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+}
+.embed-section h3 { font-size: 0.9rem; margin-bottom: 6px; }
+.embed-section p  { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; }
+.embed-section code {
+  display: block;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.82rem;
+  background: var(--code-bg);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+.embed-section button {
+  padding: 5px 16px;
+  background: #0366d6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.embed-section button:hover { background: #0256b5; }
+
+/* ── Search page ─────────────────────────────────────────────── */
+.search-page { max-width: 820px; }
+.search-page h1 { font-size: 1.3rem; margin-bottom: 18px; }
+
+.search-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.search-form input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: var(--input-bg);
+  color: var(--text);
+}
+.search-form input[type="text"]:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 2px rgba(3,102,214,0.2);
+}
+.search-form button {
+  padding: 8px 20px;
+  background: #0366d6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.search-form button:hover { background: #0256b5; }
+
+.search-count { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
+
+.search-results { display: flex; flex-direction: column; gap: 6px; }
+
+.search-result-row {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.search-result-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.search-result-summary:hover { background: var(--search-hover); }
+
+.expand-icon { font-size: 0.7rem; color: var(--text-dim); flex-shrink: 0; width: 12px; }
+
+.search-chart-expand {
+  border-top: 1px solid var(--search-expand-border);
+  padding: 12px;
+}
+
+/* ── Embed URL row (inside accordion) ───────────────────────── */
+.embed-url-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: nowrap;
+}
+.embed-url-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.embed-url-code {
+  flex: 1;
+  min-width: 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  background: var(--code-bg);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.copy-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 7px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1;
+  transition: background 0.1s, color 0.1s;
+}
+.copy-btn:hover { background: var(--bulk-hover); color: var(--text); }
+.copy-btn--ok   { color: #2ea44f; border-color: #2ea44f; }
+
+.view-link {
+  margin-left: auto;
+  color: var(--link);
+  text-decoration: none;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.view-link:hover { text-decoration: underline; }
+
+.search-empty { color: var(--text-muted); font-size: 0.95rem; margin-top: 8px; }
+
+/* ── Doodle preview (repo page + search) ─────────────────────── */
+.doodle-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  margin-top: 16px;
+}
+.doodle-wrap img { max-width: 100%; height: auto; }
+.doodle-label { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px; font-style: italic; }
+
+/* ── Repo-list entry links ───────────────────────────────────── */
+.repo-short-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  text-decoration: none;
+}
+.repo-short-name:hover { text-decoration: underline; color: var(--link); }
+

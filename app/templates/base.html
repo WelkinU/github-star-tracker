@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Star Tracker{% endblock %}</title>
+  <!-- Apply saved theme synchronously before first paint to avoid white flash -->
+  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}());</script>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <header>
+    <a href="/" class="site-title">{{ tool_name_navbar }}</a>
+    <nav>
+      <a href="/" {% if request.url.path == '/' %}class="active"{% endif %}>Dashboard</a>
+      <a href="/search" {% if request.url.path == '/search' %}class="active"{% endif %}>Search</a>
+    </nav>
+    <button class="dark-mode-toggle" id="dark-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+      <span id="dark-icon">🌙</span>
+    </button>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <script>
+    // Sync toggle icon with the theme already applied in <head>
+    (function () {
+      if (document.documentElement.getAttribute('data-theme') === 'dark') {
+        document.getElementById('dark-icon').textContent = '☀️';
+      }
+    })();
+
+    document.getElementById('dark-toggle').addEventListener('click', function () {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('dark-icon').textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      if (typeof reapplyPlotlyTheme === 'function') reapplyPlotlyTheme();
+    });
+  </script>
+</body>
+</html>
