@@ -1,6 +1,6 @@
 # GitHub Star History
 
-Internal tool to track and visualize the star history for all repositories in a GitHub organization. A daily sync script fetches star data from the GitHub API; a FastAPI web server displays interactive charts and serves embeddable static images.
+Internal tool to track and visualize the star history for all repositories in a GitHub organization. A daily sync script fetches star data from the GitHub API; a FastAPI web server displays interactive charts and serves embeddable static images. Ideally, this would replicate star-history.com for private repos in an org.
 
 ---
 
