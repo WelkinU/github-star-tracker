@@ -21,6 +21,7 @@ from app.config import load_settings
 from app.database import (
     get_all_repos,
     get_db,
+    get_last_sync_time,
     get_repo_by_name,
     get_star_history,
     init_db,
@@ -111,6 +112,30 @@ def _build_traces(
 # Routes — order matters: the doodle.png route must be registered first
 # so that /repos/123/doodle.png doesn't accidentally match the repo page.
 # ---------------------------------------------------------------------------
+
+@app.get("/about", response_class=HTMLResponse)
+async def about(request: Request) -> HTMLResponse:
+    """About page showing database sync status."""
+    with get_db(settings.database_path) as conn:
+        last_sync_raw = get_last_sync_time(conn)
+
+    last_sync: str | None = None
+    if last_sync_raw:
+        try:
+            dt = datetime.fromisoformat(last_sync_raw.replace("Z", "+00:00"))
+            last_sync = dt.strftime("%Y-%m-%d %H:%M:%S UTC")
+        except (ValueError, AttributeError):
+            last_sync = last_sync_raw
+
+    return templates.TemplateResponse(
+        request,
+        "about.html",
+        {
+            "last_sync": last_sync,
+            "tool_name_navbar": settings.tool_name_navbar,
+        },
+    )
+
 
 @app.get("/search", response_class=HTMLResponse)
 async def search(

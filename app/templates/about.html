@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}About – Star Tracker{% endblock %}
+
+{% block content %}
+<div class="about-page">
+  <h1>About</h1>
+
+  <section class="about-section">
+    <h2>Database Sync Status</h2>
+    {% if last_sync %}
+      <p>Last successfully synced: <strong>{{ last_sync }}</strong></p>
+    {% else %}
+      <p>No sync has been recorded yet. Run <code>sync.py</code> to populate the database.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

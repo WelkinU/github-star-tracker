@@ -15,8 +15,10 @@
   <div class="embed-section">
     <h3>Embed in README</h3>
     <p>The link below embeds the <strong>static doodle chart</strong> (shown below), not the interactive chart above.</p>
-    <code id="embed-code">{{ markdown_embed }}</code>
-    <button onclick="copyEmbed(this)">Copy</button>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <code id="embed-code" style="margin-bottom:0;">{{ markdown_embed }}</code>
+      <button onclick="copyEmbed(this)">Copy</button>
+    </div>
   </div>
 
   <div class="doodle-wrap">

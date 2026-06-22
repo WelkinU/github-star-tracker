@@ -219,3 +219,11 @@ def search_repos(
         """,
         (pattern,),
     ).fetchall()
+
+
+def get_last_sync_time(conn: sqlite3.Connection) -> str | None:
+    """Return the most recent last_synced timestamp across all repos, or None."""
+    row = conn.execute(
+        "SELECT MAX(last_synced) FROM repositories"
+    ).fetchone()
+    return row[0] if row else None
