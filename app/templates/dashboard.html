@@ -191,12 +191,33 @@
   document.getElementById('apply-filters').addEventListener('click', applyFilters);
 
   // ── Date range filter ─────────────────────────────────────────
+  // Derive the earliest date across all traces so a missing "from" can default to it
+  const _earliestDate = (function () {
+    let earliest = null;
+    traces.forEach(function (t) {
+      if (t.x && t.x.length) {
+        const d = t.x[0].slice(0, 10); // ISO date portion
+        if (!earliest || d < earliest) earliest = d;
+      }
+    });
+    return earliest;
+  })();
+
+  function _todayISO() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   document.getElementById('apply-dates').addEventListener('click', () => {
-    const from = document.getElementById('date-from').value;
-    const to   = document.getElementById('date-to').value;
-    currentRange = [from || null, to || null].every(v => v)
-      ? [from, to]
-      : (from ? [from, null] : (to ? [null, to] : null));
+    const from = document.getElementById('date-from').value || _earliestDate;
+    const to   = document.getElementById('date-to').value   || _todayISO();
+    // Only set a range if at least one field was explicitly filled in
+    const fromFilled = !!document.getElementById('date-from').value;
+    const toFilled   = !!document.getElementById('date-to').value;
+    if (!fromFilled && !toFilled) {
+      currentRange = null;
+    } else {
+      currentRange = [from, to];
+    }
     Plotly.relayout('chart', buildLayout(currentRange));
   });
 
